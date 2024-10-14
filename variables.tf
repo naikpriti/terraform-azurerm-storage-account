@@ -207,3 +207,10 @@ variable "container_delete_retention_days" {
   type        = number
   default     = 7
 }
+
+
+variable "user_object_id" {
+  description = "The Object ID of the User that should be granted access to the Storage Account"
+  type        = string
+  default     = false
+}

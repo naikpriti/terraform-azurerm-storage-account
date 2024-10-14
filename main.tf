@@ -33,7 +33,7 @@ resource "azurerm_storage_account" "sa" {
   dynamic "blob_properties" {
     for_each = ((var.account_kind == "BlockBlobStorage" || var.account_kind == "StorageV2") ? [1] : [])
     content {
-      versioning_enabled = var.blob_versioning_enabled
+      versioning_enabled       = var.blob_versioning_enabled
       last_access_time_enabled = var.blob_last_access_time_enabled
 
       dynamic "delete_retention_policy" {
@@ -42,14 +42,14 @@ resource "azurerm_storage_account" "sa" {
           days = var.blob_delete_retention_days
         }
       }
-      
+
       dynamic "container_delete_retention_policy" {
         for_each = (var.container_delete_retention_days == 0 ? [] : [1])
         content {
           days = var.container_delete_retention_days
         }
       }
-      
+
       dynamic "cors_rule" {
         for_each = (var.blob_cors == null ? {} : var.blob_cors)
         content {
@@ -86,4 +86,10 @@ resource "azurerm_storage_encryption_scope" "scope" {
   storage_account_id                 = azurerm_storage_account.sa.id
   source                             = coalesce(each.value.source, "Microsoft.Storage")
   infrastructure_encryption_required = coalesce(each.value.enable_infrastructure_encryption, var.infrastructure_encryption_enabled)
+}
+
+resource "azurerm_role_assignment" "storage_account_contributor" {
+  scope                = azurerm_storage_account.sa.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = var.user_object_id
 }
